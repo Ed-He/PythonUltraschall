@@ -72,7 +72,11 @@ if __name__ == '__main__':
 
                 # Durchlauf der gemessenen Werte und Erfassen des Maschinenstatus
                 for x in range(arraySize):
-                    if (abs(measurements[x] - measurements[0]) >= tolerance):
+                    if (measurements[x] == -1):
+                        print("Distanz ist zu Weit! Größer 4 Meter")
+                    elif (measurements[x] == -2):
+                        print("Messung ist ungültig!!")
+                    elif (abs(measurements[x] - measurements[0]) >= tolerance):
                         statusRunning = True
                     else:
                         statusRunning = False
