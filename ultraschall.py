@@ -77,7 +77,7 @@ if __name__ == '__main__':
                         statusRunning = False
                     elif (measurements[x] == -2):
                         print("Messung ist ungültig!!")
-                        statusRunning = False
+                        # statusRunning = False
                     elif (abs(measurements[x] - measurements[0]) >= tolerance):
                         statusRunning = True
                     else:
