@@ -52,7 +52,7 @@ def read_sensor(trigger, echo, name, itteration):
     time.sleep(0.1)
 
 if __name__ == '__main__':
-    arraySize = 5 # Die Menge an Distanzen die überprüft werden
+    arraySize = 15 # Die Menge an Distanzen die überprüft werden
     tolerance = 1 # Toleranz einstellung wie genau berechnet wird ob die Maschine läuft
 
     iteration = 0 # initialisierung der ersten Iteration
