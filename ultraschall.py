@@ -74,8 +74,10 @@ if __name__ == '__main__':
                 for x in range(arraySize):
                     if (measurements[x] == -1):
                         print("Distanz ist zu Weit! Größer 4 Meter")
+                        statusRunning = False
                     elif (measurements[x] == -2):
                         print("Messung ist ungültig!!")
+                        statusRunning = False
                     elif (abs(measurements[x] - measurements[0]) >= tolerance):
                         statusRunning = True
                     else:
