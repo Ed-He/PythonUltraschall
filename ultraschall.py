@@ -12,15 +12,6 @@ def main():
     statusRunning = False  # Initialisierung des Maschinenstatus
     measurements = [0] * arraySize  # Array Größe initialisieren
 
-    # MQTT-Client anlegen, Callbacks registrieren und zum Broker verbinden
-    client = mqtt_client.Client(client_id)
-    client.on_connect = on_connect
-    client.on_message = on_message
-    client.connect(broker, port)
-
-    client.loop_start()  # Background-Task starten, der die Callbacks ausführt
-    # client.subscribe("python/ultrasonic/settings", qos=2)  # auf Topic subscriben
-
     GPIO.setmode(GPIO.BCM)
     speedSound = 34300
 
@@ -101,6 +92,16 @@ def main():
             print(f"Send `{msg}` to topic `{topic}`")
         else:
             print(f"Failed to send message to topic {topic}")
+
+        # MQTT-Client anlegen, Callbacks registrieren und zum Broker verbinden
+
+    client = mqtt_client.Client(client_id)
+    client.on_connect = on_connect
+    client.on_message = on_message
+    client.connect(broker, port)
+
+    client.loop_start()  # Background-Task starten, der die Callbacks ausführt
+    # client.subscribe("python/ultrasonic/settings", qos=2)  # auf Topic subscriben
 
     try:
         while True:
