@@ -125,6 +125,7 @@ def main():
                         statusRunning = False
 
             if (statusRunning == True):
+                #Aktive Zeit mit einbringen - Wie lange Maschine läuft
                 msg = "Maschine is Running"
                 #print("Maschine is Running: Distanz = " + str("%.2f" % measurements[iteration]))
             else:
