@@ -99,7 +99,7 @@ def main():
     client.connect(broker, port)
 
     client.loop_start()  # Background-Task starten, der die Callbacks ausführt
-    client.subscribe("python/ultrasonic/settings", qos=2)  # auf Topic subscriben
+    # client.subscribe("python/ultrasonic/settings", qos=2)  # auf Topic subscriben
 
     try:
         while True:
