@@ -3,89 +3,88 @@ import RPi.GPIO as GPIO
 import re
 import array as arr
 
-GPIO.setmode(GPIO.BCM)
-speedSound = 34300
+def main():
+    GPIO.setmode(GPIO.BCM)
+    speedSound = 34300
 
-#MQTT-Konfiguration für Kommunikation mit Node-Red
-broker = 'localhost'
-port = 1883
-topic = "python/ultrasonic/distance"
-client_id = f'python-mqtt-ultrasonic'
+    #MQTT-Konfiguration für Kommunikation mit Node-Red
+    broker = 'localhost'
+    port = 1883
+    topic = "python/ultrasonic/distance"
+    client_id = f'python-mqtt-ultrasonic'
 
-data={
-    "distance": 0 #enthält zuletzt gemessene Distanz
-    }
+    data={
+        "distance": 0 #enthält zuletzt gemessene Distanz
+        }
 
-def on_connect(client, userdata, flags, rc):
-    if rc == 0:
-        print("Connected to MQTT Broker!")
-    else:
-        print("Failed to connect, return code %d\n", rc)
+    def on_connect(client, userdata, flags, rc):
+        if rc == 0:
+            print("Connected to MQTT Broker!")
+        else:
+            print("Failed to connect, return code %d\n", rc)
 
-def on_message(client, userdata, msg):
-    settings=json.loads(msg.payload)
-    print("received: " + str(settings))
-    #setzen von publishInterval
-    nonlocal publishInterval
-    publishInterval=float(settings["publishInterval"])
+    def on_message(client, userdata, msg):
+        settings=json.loads(msg.payload)
+        print("received: " + str(settings))
+        #setzen von publishInterval
+        nonlocal publishInterval
+        publishInterval=float(settings["publishInterval"])
 
-def get_distance(trigger, echo):
+    def get_distance(trigger, echo):
 
-    GPIO.output(trigger, False)
+        GPIO.output(trigger, False)
 
-    time.sleep(0.1)
+        time.sleep(0.1)
 
-    GPIO.output(trigger, True)
+        GPIO.output(trigger, True)
 
-    time.sleep(0.00001)
+        time.sleep(0.00001)
 
-    GPIO.output(trigger, False)
+        GPIO.output(trigger, False)
 
-    triggerTime = time.time()
+        triggerTime = time.time()
 
-    start = 0
-    stop = 0
+        start = 0
+        stop = 0
 
-    while GPIO.input(echo) == 0:
-        start = time.time()
+        while GPIO.input(echo) == 0:
+            start = time.time()
 
-        if time.time()-triggerTime > 0.1:  # war 0,1, wenn länger als 0.1 Sekunden FALSE --> Messung ungültig
-            return -2
+            if time.time()-triggerTime > 0.1:  # war 0,1, wenn länger als 0.1 Sekunden FALSE --> Messung ungültig
+                return -2
 
 
-    while GPIO.input(echo)==1:
-        stop = time.time()
+        while GPIO.input(echo)==1:
+            stop = time.time()
 
-    #berechnet distanz
-    distance = ((stop-start) * speedSound) / 2
+        #berechnet distanz
+        distance = ((stop-start) * speedSound) / 2
 
-    if(distance > 400):
-        return -1
+        if(distance > 400):
+            return -1
 
-    return distance
+        return distance
 
-def read_sensor(trigger, echo, name, itteration):
-    GPIO.setup(trigger,GPIO.OUT)  # Trigger
-    GPIO.setup(echo,GPIO.IN)      # Echo
+    def read_sensor(trigger, echo, name, itteration):
+        GPIO.setup(trigger,GPIO.OUT)  # Trigger
+        GPIO.setup(echo,GPIO.IN)      # Echo
 
-    distance = get_distance(trigger, echo)
+        distance = get_distance(trigger, echo)
 
-    measurements[itteration] = distance
+        measurements[itteration] = distance
 
-    time.sleep(0.1)
+        time.sleep(0.1)
 
-def publishBroker(client, status, topicName):
+    def publishBroker(client, status, topicName):
+        data["status"] = status
+        msg = json.dumps(data)
+        result = client.publish(topicName, msg)  # Status an Broker senden
+        status = result[0]
+        if status == 0:
+            print(f"Send `{msg}` to topic `{topic}`")
+        else:
+            print(f"Failed to send message to topic {topic}")
 
-    data["status"] = status
-    msg = json.dumps(data)
-    result = client.publish(topicName, msg)  # Status an Broker senden
-    status = result[0]
-    if status == 0:
-        print(f"Send `{msg}` to topic `{topic}`")
-    else:
-        print(f"Failed to send message to topic {topic}")
-
-if __name__ == '__main__':
     arraySize = 15 # Die Menge an Distanzen die überprüft werden
     tolerance = 1 # Toleranz einstellung wie genau berechnet wird ob die Maschine läuft
 
@@ -101,7 +100,6 @@ if __name__ == '__main__':
 
     client.loop_start()  # Background-Task starten, der die Callbacks ausführt
     client.subscribe("python/ultrasonic/settings", qos=2)  # auf Topic subscriben
-
 
     try:
         while True:
@@ -135,8 +133,9 @@ if __name__ == '__main__':
 
             publishBroker(client, msg, "status")
 
-
     # Programm beenden
     except KeyboardInterrupt:
         GPIO.cleanup()
         print("Programm abgebrochen")
+
+main()
