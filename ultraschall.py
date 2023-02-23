@@ -4,6 +4,23 @@ import re
 import array as arr
 
 def main():
+    arraySize = 15  # Die Menge an Distanzen die überprüft werden
+    tolerance = 1  # Toleranz einstellung wie genau berechnet wird ob die Maschine läuft
+    sleepTime = 0.5
+
+    iteration = 0  # initialisierung der ersten Iteration
+    statusRunning = False  # Initialisierung des Maschinenstatus
+    measurements = [0] * arraySize  # Array Größe initialisieren
+
+    # MQTT-Client anlegen, Callbacks registrieren und zum Broker verbinden
+    client = mqtt_client.Client(client_id)
+    client.on_connect = on_connect
+    client.on_message = on_message
+    client.connect(broker, port)
+
+    client.loop_start()  # Background-Task starten, der die Callbacks ausführt
+    # client.subscribe("python/ultrasonic/settings", qos=2)  # auf Topic subscriben
+
     GPIO.setmode(GPIO.BCM)
     speedSound = 34300
 
@@ -34,7 +51,7 @@ def main():
 
         GPIO.output(trigger, False)
 
-        time.sleep(0.1)
+        time.sleep(sleepTime)
 
         GPIO.output(trigger, True)
 
@@ -73,7 +90,7 @@ def main():
 
         measurements[itteration] = distance
 
-        time.sleep(0.1)
+        time.sleep(sleepTime)
 
     def publishBroker(client, status, topicName):
         data["status"] = status
@@ -84,22 +101,6 @@ def main():
             print(f"Send `{msg}` to topic `{topic}`")
         else:
             print(f"Failed to send message to topic {topic}")
-
-    arraySize = 15 # Die Menge an Distanzen die überprüft werden
-    tolerance = 1 # Toleranz einstellung wie genau berechnet wird ob die Maschine läuft
-
-    iteration = 0 # initialisierung der ersten Iteration
-    statusRunning = False # Initialisierung des Maschinenstatus
-    measurements = [0] * arraySize # Array Größe initialisieren
-
-    # MQTT-Client anlegen, Callbacks registrieren und zum Broker verbinden
-    client = mqtt_client.Client(client_id)
-    client.on_connect = on_connect
-    client.on_message = on_message
-    client.connect(broker, port)
-
-    client.loop_start()  # Background-Task starten, der die Callbacks ausführt
-    # client.subscribe("python/ultrasonic/settings", qos=2)  # auf Topic subscriben
 
     try:
         while True:
