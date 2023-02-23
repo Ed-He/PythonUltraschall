@@ -74,14 +74,11 @@ def read_sensor(trigger, echo, name, itteration):
 
     time.sleep(0.1)
 
-def publish(client, trigger, echo, topicName):
-    GPIO.setup(trigger, GPIO.OUT)
-    GPIO.setup(echo, GPIO.IN)
+def publishBroker(client, status, topicName):
 
-    topic = topicName
-    data["distance"] = get_distance(trigger, echo)  # Messung durchführen
+    data["status"] = status
     msg = json.dumps(data)
-    result = client.publish(topic, msg)  # Messwert an Broker senden
+    result = client.publish(topicName, msg)  # Status an Broker senden
     status = result[0]
     if status == 0:
         print(f"Send `{msg}` to topic `{topic}`")
@@ -95,6 +92,15 @@ if __name__ == '__main__':
     iteration = 0 # initialisierung der ersten Iteration
     statusRunning = False # Initialisierung des Maschinenstatus
     measurements = [0] * arraySize # Array Größe initialisieren
+
+    # MQTT-Client anlegen, Callbacks registrieren und zum Broker verbinden
+    client = mqtt_client.Client(client_id)
+    client.on_connect = on_connect
+    client.on_message = on_message
+    client.connect(broker, port)
+
+    client.loop_start()  # Background-Task starten, der die Callbacks ausführt
+    client.subscribe("python/ultrasonic/settings", qos=2)  # auf Topic subscriben
 
 
     try:
@@ -121,9 +127,14 @@ if __name__ == '__main__':
                         statusRunning = False
 
             if (statusRunning == True):
-                print("Maschine is Running: Distanz = " + str("%.2f" % measurements[iteration]))
+                msg = "Maschine is Running"
+                #print("Maschine is Running: Distanz = " + str("%.2f" % measurements[iteration]))
             else:
-                print("Maschine is off: Distanz = " + str("%.2f" % measurements[iteration]))
+                msg = "Maschine is off"
+                #print("Maschine is off: Distanz = " + str("%.2f" % measurements[iteration]))
+
+            publishBroker(client, msg, "status")
+
 
     # Programm beenden
     except KeyboardInterrupt:
