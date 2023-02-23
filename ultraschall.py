@@ -6,7 +6,7 @@ import array as arr
 def main():
     arraySize = 15  # Die Menge an Distanzen die überprüft werden
     tolerance = 1  # Toleranz einstellung wie genau berechnet wird ob die Maschine läuft
-    sleepTime = 0.5
+    sleepTime = 0.5 # Wartezeit zwischen Messungen
 
     iteration = 0  # initialisierung der ersten Iteration
     statusRunning = False  # Initialisierung des Maschinenstatus
