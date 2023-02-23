@@ -6,6 +6,29 @@ import array as arr
 GPIO.setmode(GPIO.BCM)
 speedSound = 34300
 
+#MQTT-Konfiguration für Kommunikation mit Node-Red
+broker = 'localhost'
+port = 1883
+topic = "python/ultrasonic/distance"
+client_id = f'python-mqtt-ultrasonic'
+
+data={
+    "distance": 0 #enthält zuletzt gemessene Distanz
+    }
+
+def on_connect(client, userdata, flags, rc):
+    if rc == 0:
+        print("Connected to MQTT Broker!")
+    else:
+        print("Failed to connect, return code %d\n", rc)
+
+def on_message(client, userdata, msg):
+    settings=json.loads(msg.payload)
+    print("received: " + str(settings))
+    #setzen von publishInterval
+    nonlocal publishInterval
+    publishInterval=float(settings["publishInterval"])
+
 def get_distance(trigger, echo):
 
     GPIO.output(trigger, False)
@@ -50,6 +73,20 @@ def read_sensor(trigger, echo, name, itteration):
     measurements[itteration] = distance
 
     time.sleep(0.1)
+
+def publish(client, trigger, echo, topicName):
+    GPIO.setup(trigger, GPIO.OUT)
+    GPIO.setup(echo, GPIO.IN)
+
+    topic = topicName
+    data["distance"] = get_distance(trigger, echo)  # Messung durchführen
+    msg = json.dumps(data)
+    result = client.publish(topic, msg)  # Messwert an Broker senden
+    status = result[0]
+    if status == 0:
+        print(f"Send `{msg}` to topic `{topic}`")
+    else:
+        print(f"Failed to send message to topic {topic}")
 
 if __name__ == '__main__':
     arraySize = 15 # Die Menge an Distanzen die überprüft werden
