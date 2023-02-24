@@ -14,9 +14,10 @@ def main():
     status_running = False  # Initialisierung des Maschinenstatus
     measurements = [0] * array_size  # Array Größe initialisieren
 
-    data = {}
     GPIO.setmode(GPIO.BCM)
     speed_sound = 34300
+    publish_interval = 1
+    data = {}
 
     # MQTT-Konfiguration für Kommunikation mit Node-Red
     broker = 'localhost'
@@ -34,8 +35,8 @@ def main():
         settings = json.loads(msg_par.payload)
         print("received: " + str(settings))
         # setzen von publishInterval
-        #nonlocal publishInterval
-        #publishInterval = float(settings["publishInterval"])
+        nonlocal publish_interval
+        publish_interval = float(settings["publish_interval"])
 
     def get_distance(trigger, echo):
 
@@ -71,13 +72,13 @@ def main():
 
         return distance
 
-    def read_sensor(trigger, echo, itteration):
+    def read_sensor(trigger, echo, iteration_par):
         GPIO.setup(trigger, GPIO.OUT)  # Trigger
         GPIO.setup(echo, GPIO.IN)  # Echo
 
         distance = get_distance(trigger, echo)
 
-        measurements[itteration] = distance
+        measurements[iteration_par] = distance
 
         time.sleep(sleep_time)
 
@@ -99,7 +100,7 @@ def main():
     client.connect(broker, port)
 
     client.loop_start()  # Background-Task starten, der die Callbacks ausführt
-    # client.subscribe("python/ultrasonic/settings", qos=2)  # auf Topic subscriben
+    client.subscribe("python/ultrasonic/settings", qos=2)  # auf Topic subscriben
 
     try:
         start_time = datetime.now()
@@ -121,7 +122,6 @@ def main():
                         status_running = False
                     elif measurements[x] == -2:
                         print("Messung ist ungültig!!")
-                        # statusRunning = False
                     elif abs(measurements[x] - measurements[0]) >= tolerance:
                         status_running = True
                     else:
