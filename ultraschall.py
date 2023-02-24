@@ -30,12 +30,12 @@ def main():
         else:
             print("Failed to connect, return code %d\n", rc)
 
-    def on_message(msg):
-        settings = json.loads(msg.payload)
+    def on_message(msg_par):
+        settings = json.loads(msg_par.payload)
         print("received: " + str(settings))
         # setzen von publishInterval
-        nonlocal publishInterval
-        publishInterval = float(settings["publishInterval"])
+        #nonlocal publishInterval
+        #publishInterval = float(settings["publishInterval"])
 
     def get_distance(trigger, echo):
 
@@ -66,7 +66,7 @@ def main():
         # berechnet distanz
         distance = ((stop - start) * speed_sound) / 2
 
-        if (distance > 4000):
+        if distance > 4000:
             return -1
 
         return distance
@@ -81,15 +81,15 @@ def main():
 
         time.sleep(sleep_time)
 
-    def publishBroker(client, status, topicName):
+    def publish_broker(client_par, status, topic_name):
         data["status"] = status
-        msg = json.dumps(data)
-        result = client.publish(topicName, msg)  # Status an Broker senden
+        json_message = json.dumps(data)
+        result = client_par.publish(topic_name, json_message)  # Status an Broker senden
         status = result[0]
         if status == 0:
-            print(f"Send `{msg}` to topic `{topicName}`")
+            print(f"Send `{json_message}` to topic `{topic_name}`")
         else:
-            print(f"Failed to send message to topic {topicName}")
+            print(f"Failed to send message to topic {topic_name}")
 
         # MQTT-Client anlegen, Callbacks registrieren und zum Broker verbinden
 
@@ -134,7 +134,7 @@ def main():
                 inaktiv_time = datetime.now() - (start_time + aktiv_time)
                 msg = "Maschine is off"
 
-            publishBroker(client, msg, "status")
+            publish_broker(client, msg, "status")
 
     # Programm beenden
     except KeyboardInterrupt:
