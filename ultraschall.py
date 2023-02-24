@@ -84,8 +84,8 @@ def main():
 
     def publish_broker(client_par, status, topic_name, active_time_par, inactive_time_par):
         data["status"] = status
-        data["active_time"] = active_time_par
-        data["inactive_time"] = inactive_time_par
+        data["active_time"] = active_time_par.strftime("%H:%M:%S")
+        data["inactive_time"] = inactive_time_par.strftime("%H:%M:%S")
         json_message = json.dumps(data)
         result = client_par.publish(topic_name, json_message)  # Status an Broker senden
         status = result[0]
