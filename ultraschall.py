@@ -1,9 +1,8 @@
 import time
 import json
 import RPi.GPIO as GPIO
-import re
-import array as arr
 from paho.mqtt import client as mqtt_client
+from datetime import datetime
 
 def main():
     arraySize = 10  # Die Menge an Distanzen die überprüft werden
@@ -14,20 +13,22 @@ def main():
     statusRunning = False  # Initialisierung des Maschinenstatus
     measurements = [0] * arraySize  # Array Größe initialisieren
 
+    data = {}
+
     GPIO.setmode(GPIO.BCM)
     speedSound = 34300
 
     #MQTT-Konfiguration für Kommunikation mit Node-Red
     broker = 'localhost'
     port = 1883
-    topic = "python/ultrasonic/distance"
+    #topic = "python/ultrasonic/distance"
     client_id = f'python-mqtt-ultrasonic'
 
     # Definition von Variablen/ Listen
     publishInterval = 1 #Wartezeit nach jedem Messvorgang
-    data={
-        "status": "" #enthält letzten Status
-        }
+    #data={
+    #    "status": "" #enthält letzten Status
+    #    }
 
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
@@ -108,6 +109,9 @@ def main():
     # client.subscribe("python/ultrasonic/settings", qos=2)  # auf Topic subscriben
 
     try:
+        start = datetime.now()
+        aktiv = datetime.now() - start
+        inaktiv = datetime.now() - start
         while True:
             read_sensor(20, 12, iteration)
 
@@ -131,12 +135,11 @@ def main():
                         statusRunning = False
 
             if (statusRunning == True):
-                #Aktive Zeit mit einbringen - Wie lange Maschine läuft
+                aktiv = datetime.now() - (start + inaktiv)
                 msg = "Maschine is Running"
-                #print("Maschine is Running: Distanz = " + str("%.2f" % measurements[iteration]))
             else:
+                inaktiv = datetime.now() - (start + aktiv)
                 msg = "Maschine is off"
-                #print("Maschine is off: Distanz = " + str("%.2f" % measurements[iteration]))
 
             publishBroker(client, msg, "status")
 
