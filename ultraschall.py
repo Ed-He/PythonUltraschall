@@ -82,10 +82,10 @@ def main():
 
         time.sleep(sleep_time)
 
-    def publish_broker(client_par, status, topic_name, aktive_time_par, inaktiv_time_par):
+    def publish_broker(client_par, status, topic_name, active_time_par, inactive_time_par):
         data["status"] = status
-        data["aktive_time"] = aktive_time_par
-        data["inaktive_time"] = inaktiv_time_par
+        data["active_time"] = active_time_par
+        data["inactive_time"] = inactive_time_par
         json_message = json.dumps(data)
         result = client_par.publish(topic_name, json_message)  # Status an Broker senden
         status = result[0]
@@ -106,8 +106,8 @@ def main():
 
     try:
         start_time = datetime.now()
-        aktiv_time = datetime.now() - start_time
-        inaktiv_time = datetime.now() - start_time
+        active_time = datetime.now() - start_time
+        inactive_time = datetime.now() - start_time
         while True:
             read_sensor(20, 12, iteration)
 
@@ -130,13 +130,13 @@ def main():
                         status_running = False
 
             if status_running:
-                aktiv_time = datetime.now() - (start_time + inaktiv_time)
+                active_time = datetime.now() - (start_time + inactive_time)
                 msg = "Maschine is Running"
             else:
-                inaktiv_time = datetime.now() - (start_time + aktiv_time)
+                inactive_time = datetime.now() - (start_time + active_time)
                 msg = "Maschine is off"
 
-            publish_broker(client, msg, "status", aktiv_time, inaktiv_time)
+            publish_broker(client, msg, "status", active_time, inactive_time)
 
     # Programm beenden
     except KeyboardInterrupt:
