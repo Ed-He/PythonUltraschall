@@ -77,7 +77,7 @@ def main():
 
         return distance
 
-    def read_sensor(trigger, echo, name, itteration):
+    def read_sensor(trigger, echo, itteration):
         GPIO.setup(trigger,GPIO.OUT)  # Trigger
         GPIO.setup(echo,GPIO.IN)      # Echo
 
@@ -109,7 +109,7 @@ def main():
 
     try:
         while True:
-            read_sensor(20, 12, "Lang", iteration)
+            read_sensor(20, 12, iteration)
 
             iteration = iteration + 1
 
