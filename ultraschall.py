@@ -1,7 +1,9 @@
 import time
+import json
 import RPi.GPIO as GPIO
 import re
 import array as arr
+from paho.mqtt import client as mqtt_client
 
 def main():
     arraySize = 10  # Die Menge an Distanzen die überprüft werden
@@ -21,8 +23,10 @@ def main():
     topic = "python/ultrasonic/distance"
     client_id = f'python-mqtt-ultrasonic'
 
+    # Definition von Variablen/ Listen
+    publishInterval = 1 #Wartezeit nach jedem Messvorgang
     data={
-        "distance": 0 #enthält zuletzt gemessene Distanz
+        "status": "" #enthält letzten Status
         }
 
     def on_connect(client, userdata, flags, rc):
@@ -68,7 +72,7 @@ def main():
         #berechnet distanz
         distance = ((stop-start) * speedSound) / 2
 
-        if(distance > 400):
+        if(distance > 4000):
             return -1
 
         return distance
@@ -89,9 +93,9 @@ def main():
         result = client.publish(topicName, msg)  # Status an Broker senden
         status = result[0]
         if status == 0:
-            print(f"Send `{msg}` to topic `{topic}`")
+            print(f"Send `{msg}` to topic `{topicName}`")
         else:
-            print(f"Failed to send message to topic {topic}")
+            print(f"Failed to send message to topic {topicName}")
 
         # MQTT-Client anlegen, Callbacks registrieren und zum Broker verbinden
 
