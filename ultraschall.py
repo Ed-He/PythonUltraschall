@@ -25,13 +25,13 @@ def main():
     # topic = "python/ultrasonic/distance"
     client_id = f'python-mqtt-ultrasonic'
 
-    def on_connect(rc):
+    def on_connect(client, userdata, flags, rc):
         if rc == 0:
             print("Connected to MQTT Broker!")
         else:
             print("Failed to connect, return code %d\n", rc)
 
-    def on_message(msg_par):
+    def on_message(client, userdata, msg_par):
         settings = json.loads(msg_par.payload)
         print("received: " + str(settings))
         # setzen von publishInterval
@@ -82,8 +82,10 @@ def main():
 
         time.sleep(sleep_time)
 
-    def publish_broker(client_par, status, topic_name):
+    def publish_broker(client_par, status, topic_name, aktive_time_par, inaktiv_time_par):
         data["status"] = status
+        data["aktive_time"] = aktive_time_par
+        data["inaktive_time"] = inaktiv_time_par
         json_message = json.dumps(data)
         result = client_par.publish(topic_name, json_message)  # Status an Broker senden
         status = result[0]
@@ -134,7 +136,7 @@ def main():
                 inaktiv_time = datetime.now() - (start_time + aktiv_time)
                 msg = "Maschine is off"
 
-            publish_broker(client, msg, "status")
+            publish_broker(client, msg, "status", aktiv_time, inaktiv_time)
 
     # Programm beenden
     except KeyboardInterrupt:
