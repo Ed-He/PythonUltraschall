@@ -171,6 +171,7 @@ if __name__ == '__main__':
                 send_mqtt()
                 statusalt = status
                 client.publish("201000000/machines/AMB-Motor/distance", abstand, qos=1)
+                print(f"Status: '{status}',Abstand: '{abstand}'")
 
             #Warten um Abtastfrequenz zu realisieren
             time.sleep(0.2)
