@@ -1,9 +1,16 @@
-import time
-import json
-import RPi.GPIO as GPIO
-from paho.mqtt import client as mqtt_client
-from datetime import datetime
 
+#GPIO-Pins benutzen
+import RPi.GPIO as GPIO
+#Einbindung der Zeit
+import time
+from datetime import datetime
+#MQTT Dateb versebdeb
+import json
+from paho.mqtt import client as mqtt_client
+import ssl
+#Routine bei Programmstop
+import signal
+import sys
 
 def main():
     array_size = 10  # Die Menge an Distanzen die überprüft werden
@@ -87,7 +94,7 @@ def main():
         data["active_time"] = active_time_par.strftime("%H:%M:%S")
         data["inactive_time"] = inactive_time_par.strftime("%H:%M:%S")
         json_message = json.dumps(data)
-        result = client_par.publish(topic_name, json_message)  # Status an Broker senden
+        result = client_par.publish(topic_name, json_message, qos=1)  # Status an Broker senden
         status = result[0]
         if status == 0:
             print(f"Send `{json_message}` to topic `{topic_name}`")
