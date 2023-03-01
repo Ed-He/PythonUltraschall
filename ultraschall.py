@@ -114,9 +114,13 @@ def main():
     client.subscribe("python/ultrasonic/settings", qos=2)  # auf Topic subscriben
 
     try:
-        start_time = datetime.now()
-        active_time = datetime.now() - start_time
-        inactive_time = datetime.now() - start_time
+        start_time = time.time()
+        active_time = time.time() - start_time
+        inactive_time = time.time() - start_time
+
+        #start_time = datetime.now()
+        #active_time = datetime.now() - start_time
+        #inactive_time = datetime.now() - start_time
         while True:
             read_sensor(GPIO_TRIGGER, GPIO_ECHO, iteration)
 
@@ -139,10 +143,10 @@ def main():
                         status_running = False
 
             if status_running:
-                active_time = datetime.now() - (start_time + inactive_time)
+                active_time = time.time() - (start_time + inactive_time)
                 msg = "Maschine is Running"
             else:
-                inactive_time = datetime.now() - (start_time + active_time)
+                inactive_time = time.time() - (start_time + active_time)
                 msg = "Maschine is off"
 
             publish_broker(client, msg, "status", active_time, inactive_time)
