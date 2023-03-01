@@ -23,6 +23,8 @@ def main():
 
     GPIO.setmode(GPIO.BCM)
     speed_sound = 34300
+    GPIO_TRIGGER = 18
+    GPIO_ECHO = 23
     publish_interval = 1
     data = {}
 
@@ -116,7 +118,7 @@ def main():
         active_time = datetime.now() - start_time
         inactive_time = datetime.now() - start_time
         while True:
-            read_sensor(20, 12, iteration)
+            read_sensor(GPIO_TRIGGER, GPIO_ECHO, iteration)
 
             iteration = iteration + 1
 
