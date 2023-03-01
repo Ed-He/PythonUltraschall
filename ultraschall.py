@@ -13,18 +13,19 @@ import signal
 import sys
 
 def main():
-    array_size = 10  # Die Menge an Distanzen die überprüft werden
+    # Variable Werte zum Einstellen/ Einrichten
+    array_size = 5  # Die Menge an Distanzen die überprüft werden
     tolerance = 1  # Toleranz einstellung wie genau berechnet wird ob die Maschine läuft
     sleep_time = 0.5  # Wartezeit zwischen Messungen
+    GPIO_TRIGGER = 18
+    GPIO_ECHO = 23
 
+    # Vordefinierte Werte für die allgemeine Funktion
     iteration = 0  # initialisierung der ersten Iteration
     status_running = False  # Initialisierung des Maschinenstatus
     measurements = [0] * array_size  # Array Größe initialisieren
-
     GPIO.setmode(GPIO.BCM)
     speed_sound = 34300
-    GPIO_TRIGGER = 18
-    GPIO_ECHO = 23
     publish_interval = 1
     data = {}
 
@@ -93,8 +94,8 @@ def main():
 
     def publish_broker(client_par, status, topic_name, active_time_par, inactive_time_par):
         data["status"] = status
-        data["active_time"] = active_time_par.strftime("%H:%M:%S")
-        data["inactive_time"] = inactive_time_par.strftime("%H:%M:%S")
+        data["active_time"] = str("%2.f" % active_time_par)#.strftime("%H:%M:%S")
+        data["inactive_time"] = str("%2.f" % inactive_time_par)#.strftime("%H:%M:%S")
         json_message = json.dumps(data)
         result = client_par.publish(topic_name, json_message, qos=1)  # Status an Broker senden
         status = result[0]
