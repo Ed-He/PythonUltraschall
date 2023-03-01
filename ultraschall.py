@@ -1,24 +1,24 @@
-
-#GPIO-Pins benutzen
+# GPIO-Pins benutzen
 import RPi.GPIO as GPIO
-#Einbindung der Zeit
+# Einbindung der Zeit
 import time
-from datetime import datetime
-#MQTT Dateb versebdeb
+# from datetime import datetime
+# MQTT Dateb versebdeb
 import json
 from paho.mqtt import client as mqtt_client
-import ssl
-#Routine bei Programmstop
-import signal
-import sys
+# import ssl
+# Routine bei Programmstop
+# import signal
+# import sys
+
 
 def main():
     # Variable Werte zum Einstellen/ Einrichten
-    array_size = 5  # Die Menge an Distanzen die überprüft werden
+    array_size = 3  # Die Menge an Distanzen die überprüft werden
     tolerance = 1  # Toleranz einstellung wie genau berechnet wird ob die Maschine läuft
     sleep_time = 0.5  # Wartezeit zwischen Messungen
-    GPIO_TRIGGER = 18
-    GPIO_ECHO = 23
+    gpio_trigger = 18
+    gpio_echo = 23
 
     # Vordefinierte Werte für die allgemeine Funktion
     iteration = 0  # initialisierung der ersten Iteration
@@ -77,7 +77,7 @@ def main():
         # berechnet distanz
         distance = ((stop - start) * speed_sound) / 2
 
-        if distance > 4000:
+        if distance > 400:
             return -1
 
         return distance
@@ -94,8 +94,11 @@ def main():
 
     def publish_broker(client_par, status, topic_name, active_time_par, inactive_time_par):
         data["status"] = status
-        data["active_time"] = str("%2.f" % active_time_par)#.strftime("%H:%M:%S")
-        data["inactive_time"] = str("%2.f" % inactive_time_par)#.strftime("%H:%M:%S")
+        data["active_time"] = int(active_time_par)  # .strftime("%H:%M:%S")
+        data["inactive_time"] = int(inactive_time_par)  # .strftime("%H:%M:%S")
+
+        # data["active_time"] = str("%0.2f" % active_time_par)#.strftime("%H:%M:%S")
+        # data["inactive_time"] = str("%0.2f" % inactive_time_par)#.strftime("%H:%M:%S")
         json_message = json.dumps(data)
         result = client_par.publish(topic_name, json_message, qos=1)  # Status an Broker senden
         status = result[0]
@@ -117,13 +120,13 @@ def main():
     try:
         start_time = time.time()
         active_time = time.time() - start_time
-        inactive_time = time.time() - start_time
+        inactive_time = active_time
 
-        #start_time = datetime.now()
-        #active_time = datetime.now() - start_time
-        #inactive_time = datetime.now() - start_time
+        # start_time = datetime.now()
+        # active_time = datetime.now() - start_time
+        # inactive_time = datetime.now() - start_time
         while True:
-            read_sensor(GPIO_TRIGGER, GPIO_ECHO, iteration)
+            read_sensor(gpio_trigger, gpio_echo, iteration)
 
             iteration = iteration + 1
 
