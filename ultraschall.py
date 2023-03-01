@@ -59,27 +59,30 @@ def main():
         GPIO.output(trigger, True)
         time.sleep(0.00001)
         GPIO.output(trigger, False)
-        trigger_time = time.time()
 
+        # Anlegen von Variablen zum Speichern von Start- und Stopzeit
         start = 0
         stop = 0
 
+        # Bestimmung der Singalstartzeit
         while GPIO.input(echo) == 0:
             start = time.time()
 
-            if time.time() - trigger_time > 0.1:  # war 0,1, wenn länger als 0.1 Sekunden FALSE --> Messung ungültig
-                return -2
-
+        # Bestimmung der Signalstopzeit
         while GPIO.input(echo) == 1:
             stop = time.time()
 
         # berechnet distanz
         distance = ((stop - start) * speed_sound) / 2
 
-        if distance > 400:
-            return -1
-
         return distance
+
+    def analyse():
+            global analyse_val
+
+        if (False):
+            # asda
+
 
     def read_sensor(iteration_par):
 
@@ -127,12 +130,7 @@ def main():
 
                 # Durchlauf der gemessenen Werte und Erfassen des Maschinenstatus
                 for x in range(array_size):
-                    if measurements[x] == -1:
-                        print("Distanz ist zu Weit! Größer 4 Meter")
-                        status_running = False
-                    elif measurements[x] == -2:
-                        print("Messung ist ungültig!!")
-                    elif abs(measurements[x] - measurements[0]) >= tolerance:
+                    if abs(measurements[x] - measurements[0]) >= tolerance:
                         status_running = True
                     else:
                         status_running = False
